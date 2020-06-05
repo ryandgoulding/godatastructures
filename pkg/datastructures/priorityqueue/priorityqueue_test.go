@@ -14,7 +14,8 @@ package priorityqueue_test
 
 import (
 	"container/heap"
-	"github.com/ryandgoulding/datastructures/pkg/datastructures/priorityqueue"
+	"encoding/json"
+	"github.com/ryandgoulding/godatastructures/pkg/datastructures/priorityqueue"
 	"os"
 	"testing"
 )
@@ -111,6 +112,26 @@ func TestPriorityQueue_Pop(t *testing.T) {
 			if expected != actual {
 				t.Fatalf("%s: Expected: %s Actual %s", testCase.description, expected, actual)
 			}
+		}
+	}
+}
+
+func TestPriorityQueue_MarshalJSON(t *testing.T) {
+	// Simple re-entrance test.  MarshalJSON is destructive in this instance, since popping from a PriorityQueue is
+	// destructive.  Ensure that subsequent calls return the same result.
+	for _, testCase := range testCases {
+		firstJsonBytes, err := json.MarshalIndent(testCase.pq, "", "  ")
+		if err != nil {
+			t.Fatalf("Unexpected error marshaling JSON: %s", err)
+		}
+		firstJsonString := string(firstJsonBytes)
+		secondJsonBytes, err := json.MarshalIndent(testCase.pq, "", "  ")
+		if err != nil {
+			t.Fatalf("Unexpected error marshaling JSON: %s", err)
+		}
+		secondJsonString := string(secondJsonBytes)
+		if firstJsonString != secondJsonString {
+			t.Fatalf("Expected a match for: %s %s", firstJsonString, secondJsonString)
 		}
 	}
 }
